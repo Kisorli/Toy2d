@@ -6,7 +6,7 @@ project(Toy2D
 set(CMAKE_CXX_STANDDARD 17)
 
 find_package(sdl2 REQUIRED)
-find_package(vulkna REQUIRED)
+find_package(vulkan REQUIRED)
 
 add_subdirectory("toy2d")
 add_subdirectory("sandbox")
