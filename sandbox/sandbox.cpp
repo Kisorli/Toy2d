@@ -1,19 +1,10 @@
-class Sandbox
-{
-public:
-    Sandbox()
-    {
+#include<cstdlib>
 
-    }
-    ~Sandbox()
-    {
-
-    }
-};
+#include<Application.h>
 
 int main()
 {
-    Sandbox* sandbox = new Sandbox();
-    delete sandbox;
-    return 0;
+    Application* app = new Application();
+    app->run();
+    return EXIT_SUCCESS;
 }
