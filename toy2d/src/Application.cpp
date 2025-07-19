@@ -113,6 +113,7 @@ VkResult Application::vkCreateInstance(const VkInstanceCreateInfo* pCreateInfo, 
     {
         return VK_ERROR_INITIALIZATION_FAILED;
     }
+    return ::vkCreateInstance(pCreateInfo, pAllocator, instance);
 }
 
 std::vector<const char *> Application::getRequiredExtensions()
