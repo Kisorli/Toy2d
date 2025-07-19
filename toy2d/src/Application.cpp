@@ -55,20 +55,42 @@ void Application::createInstance()
         vk::ApiVersion14
     );
 
-    uint32_t glfwExtensionCount = 0;
-    auto glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
+    std::vector<char const*> requiredLayers;
+    if (enableValidationLayers)
+    {
+        requiredLayers.assign(validationLayers.begin(), validationLayers.end());
+    }
+
+    auto layerProperties = context.enumerateInstanceLayerProperties();
+    if (
+        std::ranges::any_of(
+            requiredLayers, [&layerProperties](auto const& requiredLayer)
+            {
+                return std::ranges::none_of(
+                    layerProperties,
+                    [requiredLayer](auto const& layerProperty)
+                    { return strcmp(layerProperty.layerName,requiredLayer) == 0; }
+                );
+            }
+        )
+    )
+    {
+        throw std::runtime_error("One or more required layers are not support! ");
+    }
+
+    auto requiredExtensions = getRequiredExtensions();
 
     auto extensionProperties = context.enumerateInstanceExtensionProperties();
-    for (uint32_t i = 0; i < glfwExtensionCount; ++i)
+    for (auto const& requiredExtension : requiredExtensions)
     {
         if (std::ranges::none_of
         (
             extensionProperties,
-            [glfwExtension = glfwExtensions[i]](auto const& extensionProperty)
-            { return strcmp(extensionProperty.extensionName, glfwExtension) == 0; }
+            [requiredExtension](auto const& extensionProperty)
+            { return strcmp(extensionProperty.extensionName, requiredExtension) == 0; }
         ))
         {
-            throw std::runtime_error("Required GLFW extension not supported: " + std::string(glfwExtensions[i]));
+            throw std::runtime_error("Required GLFW extension not supported: " + std::string(requiredExtension));
         }
     }
 
@@ -76,11 +98,34 @@ void Application::createInstance()
     (
         {},
         &appInfo,
-        glfwExtensionCount,
-        glfwExtensions
+        static_cast<uint32_t>(requiredLayers.size()),
+        requiredLayers.data(),
+        static_cast<uint32_t>(requiredExtensions.size()),
+        requiredExtensions.data()
     );
 
     instance = vk::raii::Instance(context, createInfo);
+}
+
+VkResult Application::vkCreateInstance(const VkInstanceCreateInfo* pCreateInfo, const VkAllocationCallbacks* pAllocator, VkInstance* instance)
+{
+    if (pCreateInfo == nullptr || instance == nullptr)
+    {
+        return VK_ERROR_INITIALIZATION_FAILED;
+    }
+}
+
+std::vector<const char *> Application::getRequiredExtensions()
+{
+    uint32_t glfwExtensionCount = 0;
+    auto glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
+     std::vector extensions(glfwExtensions, glfwExtensions + glfwExtensionCount);
+     if (enableValidationLayers)
+     {
+        extensions.push_back(vk::EXTDebugUtilsExtensionName);
+     }
+
+     return extensions;
 }
 
 void Application::key_callback(GLFWwindow *window, int key, int scancode, int action, int mods)
@@ -97,4 +142,16 @@ void Application::key_callback(GLFWwindow *window, int key, int scancode, int ac
             break;
         }
     }
+}
+
+VKAPI_ATTR vk::Bool32 VKAPI_CALL Application::debugCallback(vk::DebugUtilsMessageSeverityFlagBitsEXT severity, vk::DebugUtilsMessageTypeFlagsEXT type, const vk::DebugUtilsMessengerCallbackDataEXT *pCallbackData, void *)
+{
+    std::cerr << "validation layer: type " << to_string(type) << " msg: " << pCallbackData->pMessage << std::endl;
+
+    if (severity >= vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning) 
+    {
+        // Message is important enough to show
+    }
+
+    return vk::False;
 }
