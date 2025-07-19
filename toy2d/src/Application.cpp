@@ -2,6 +2,7 @@
 
 void Application::run()
 {
+    initWindow();
     initVulkan();
     mainLoop();
     cleanup();
