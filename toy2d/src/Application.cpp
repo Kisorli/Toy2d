@@ -17,6 +17,7 @@ void Application::run()
 void Application::initVulkan()
 {
     createInstance();
+    setupDebugMessenger();
 }
 
 void Application::initWindow()
@@ -105,6 +106,21 @@ void Application::createInstance()
     );
 
     instance = vk::raii::Instance(context, createInfo);
+}
+
+void Application::setupDebugMessenger()
+{
+    if (!enableValidationLayers) return;
+    vk::DebugUtilsMessageSeverityFlagsEXT serverityFlags( vk::DebugUtilsMessageSeverityFlagBitsEXT::eVerbose | vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning | vk::DebugUtilsMessageSeverityFlagBitsEXT::eError );
+    vk::DebugUtilsMessageTypeFlagsEXT messageTypeFlags( vk::DebugUtilsMessageTypeFlagBitsEXT::eGeneral | vk::DebugUtilsMessageTypeFlagBitsEXT::ePerformance | vk::DebugUtilsMessageTypeFlagBitsEXT::eValidation );
+    vk::DebugUtilsMessengerCreateInfoEXT debugUtilsMessengerCreateInfoEXT
+    (
+        {},
+        serverityFlags,
+        messageTypeFlags,
+        &debugCallback
+    );
+    debugMessenger = instance.createDebugUtilsMessengerEXT(debugUtilsMessengerCreateInfoEXT);
 }
 
 VkResult Application::vkCreateInstance(const VkInstanceCreateInfo* pCreateInfo, const VkAllocationCallbacks* pAllocator, VkInstance* instance)

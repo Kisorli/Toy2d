@@ -34,6 +34,7 @@ private:
     void cleanup();
 
     void createInstance();
+    void setupDebugMessenger();
 
     VkResult vkCreateInstance(const VkInstanceCreateInfo* pCreateInfo, const VkAllocationCallbacks* pAllocator, VkInstance* instance);
     std::vector<const char*> getRequiredExtensions();
