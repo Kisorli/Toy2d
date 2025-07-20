@@ -21,6 +21,13 @@ constexpr bool enableValidationLayers = false;
 constexpr bool enableValidationLayers = true;
 #endif
 
+std::vector<const char*> deviceExtensions = {
+    vk::KHRSwapchainExtensionName,
+    vk::KHRSpirv14ExtensionName,
+    vk::KHRSynchronization2ExtensionName,
+    vk::KHRCreateRenderpass2ExtensionName
+};
+
 class Application
 {
 public:
@@ -33,9 +40,12 @@ private:
     void mainLoop();
     void cleanup();
 
+    //For initVulkan function
     void createInstance();
     void setupDebugMessenger();
+    void pickPhysicalDevice();
 
+    //Other function
     VkResult vkCreateInstance(const VkInstanceCreateInfo* pCreateInfo, const VkAllocationCallbacks* pAllocator, VkInstance* instance);
     std::vector<const char*> getRequiredExtensions();
 
@@ -49,4 +59,5 @@ private:
     vk::raii::Context context;
     vk::raii::Instance instance = nullptr;
     vk::raii::DebugUtilsMessengerEXT debugMessenger = nullptr;
+    vk::raii::PhysicalDevice physicalDevice;
 };
